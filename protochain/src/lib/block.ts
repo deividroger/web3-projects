@@ -84,9 +84,11 @@ export default class Block {
                 return new Validation(false, "Too many fees.");
             }
 
-            if(feeTxs[0].to !== this.miner){
+            if(!feeTxs[0].txOutputs.some(txo=> txo.toAddress === this.miner)){
                 return new Validation(false, "Invalid fee tx: different from miner.");
             }
+
+            //TODO: colocar validação de quantidade taxas
 
             const validations = this.transactions.map(tx => tx.isValid());
             const errors = validations.filter(v => !v.success).map(v => v.message);
@@ -101,7 +103,7 @@ export default class Block {
         if (this.timestamp < 1) return new Validation(false, "Invalid timestamp");
         if (this.previousHash !== previousHash) return new Validation(false, "Invalid previous hash");;
 
-        if (!this.nonce || !this.miner) return new Validation(false, "No mined.");
+        if (this.nonce <1 || !this.miner) return new Validation(false, "No mined.");
 
         //if (this.hash !== this.getHash() ||  !this.hash.startsWith(prefix))
         if (this.hash !== this.getHash())

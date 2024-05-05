@@ -2,9 +2,7 @@ import Block from "./block";
 import Validation from "../validation";
 import BlockInfo from "../blockInfo";
 import Transaction from "./transaction";
-import TransactionType from "../transactionType";
 import TransactionSearch from "../transactionSearch";
-import TransactionInput from "./transactionInput";
 /**
  * Mock Blockchain class
  */
@@ -19,20 +17,21 @@ export default class BlockChain {
     /**
      * Creates a new Mock Blockchain
      */
-    constructor() {
+    constructor(miner: string) {
 
-        this.mempool = [];
+        this.blocks = [];
+        this.mempool = [new Transaction()];
 
-        this.blocks = [new Block({
-            index: 0,
-            previousHash: "",
-            transactions: [new Transaction({
-                txInput: new TransactionInput(),
-                type: TransactionType.FEE
-            } as Transaction)],
-            timestamp: Date.now(),
-            hash: 'abc'
-        } as Block)]
+        this.blocks.push(new Block(
+            {
+                index: 0,
+                previousHash: "abc",
+                miner: miner,
+                timestamp: Date.now(),
+                hash: 'abc'
+            } as Block
+
+        ));
         this.nextIndex++;
     }
 
@@ -64,15 +63,27 @@ export default class BlockChain {
 
     getTransaction(hash: string): TransactionSearch {
 
+
+        if (hash === "-1") {
+            return {
+                mempoolIndex: -1,
+                blockIndex: -1
+            } as TransactionSearch
+        }
+
         return {
             mempoolIndex: 0,
-            transaction: {
-                hash: hash
-            }
+            blockIndex:1 ,
+            transaction: new Transaction()
         } as TransactionSearch;
     }
 
     getBlock(hash: string): Block | undefined {
+
+        if(!hash || hash === "-1"){
+            return undefined;
+        }
+
         return this.blocks.find(b => b.hash === hash)!;
     }
 
@@ -85,15 +96,13 @@ export default class BlockChain {
     }
 
     getDifficulty(): number {
-        return Math.ceil(this.blocks.length / BlockChain.DIFFICULTY_FACTOR) +1 ;
+        return Math.ceil(this.blocks.length / BlockChain.DIFFICULTY_FACTOR) + 1;
     }
 
     getNextBlock(): BlockInfo {
 
 
-        const transactions = [new Transaction({
-            txInput: new TransactionInput(),
-        } as Transaction)];
+        const transactions = this.mempool.slice(0,2);
 
         const difficulty = this.getDifficulty();
         const previousHash = this.getLastBlock().hash;

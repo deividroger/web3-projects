@@ -5,6 +5,7 @@ import readline from 'readline';
 import Transaction from "../lib/transaction";
 import TransactionType from "../lib/transactionType";
 import TransactionInput from "../lib/transactionInput";
+import TransactionOutput from "../lib/__mocks__/transactionOutput";
 dotenv.config();
 
 const BLOCKCHAIN_SERVER = process.env.BLOCKCHAIN_SERVER;
@@ -79,7 +80,7 @@ function createWallet() {
 }
 
 function recoverWallet() {
-  rl.question("What is  your private key or WIF", (wifOrPrivateKey) => {
+  rl.question("What is  your private key or WIF ", (wifOrPrivateKey) => {
     console.clear();
     const wallet = new Wallet(wifOrPrivateKey);
     console.log("Your recovery wallet: ");
@@ -109,53 +110,65 @@ function sendTx() {
   console.clear();
 
   if (!myWalletPub) {
-    console.log('You dont have a wallet yet...');
-    return preMenu();
+      console.log(`You don't have a wallet yet.`);
+      return preMenu();
   }
-  console.log(`You wallet is ${myWalletPub}`);
 
-  rl.question("To wallet: ", (toWallet) => {
-    if (toWallet.length < 60) {
-      console.log('Invalid wallet');
-      return preMenu();
-    }
-
-    rl.question('Amount: ', async (amountStr) => {
-      const amount = parseInt(amountStr);
-      if (!amount) {
-        console.log('Invalid amount.')
-        return preMenu();
+  console.log(`Your wallet is ${myWalletPub}`);
+  rl.question(`To Wallet: `, (toWallet) => {
+      if (toWallet.length < 66) {
+          console.log(`Invalid wallet.`);
+          return preMenu();
       }
 
-      const tx = new Transaction({
-        timestamp: Date.now(),
-        to: toWallet,
-        type: TransactionType.REGULAR,
-        txInput: {
-          amount: amount,
-          fromAddress: myWalletPub
-        } as TransactionInput
+      rl.question(`Amount: `, async (amountStr) => {
+          const amount = parseInt(amountStr);
+          if (!amount) {
+              console.log(`Invalid amount.`);
+              return preMenu();
+          }
 
-      } as Transaction);
+          const walletResponse = await axios.get(`${BLOCKCHAIN_SERVER}/wallets/${myWalletPub}`);
+          const balance = walletResponse.data.balance as number;
+          const fee = walletResponse.data.fee as number;
+          const utxo = walletResponse.data.utxo as TransactionOutput[];
 
-      tx.txInput?.sign(myWalletPriv);
-      tx.hash = tx.getHash();
+          if (balance < amount + fee) {
+              console.log(`Insufficient balance (tx + fee).`);
+              return preMenu();
+          }
 
-      try {
-        const txResponse = await axios.post(`${BLOCKCHAIN_SERVER}/transactions/`, tx);
-        console.log('Transaction accepted. Waiting the miners.')
-        console.log(txResponse.data.hash);
-      } catch (error: any) {
-        console.error(error.response ? error.response.data : error.message);
+          const tx = new Transaction();
+          tx.timestamp = Date.now();
+          tx.txOutputs = [new TransactionOutput({
+              toAddress: toWallet,
+              amount: amount
+          } as TransactionOutput)];
 
-      }
-      return preMenu();
+          tx.type = TransactionType.REGULAR;
 
-    });
+          tx.txInputs = [new TransactionInput({
+              amount,
+              fromAddress: myWalletPub,
+              previousTx: utxo[0].tx
+          } as TransactionInput)];
 
+          tx.txInputs[0].sign(myWalletPriv);
+          tx.txOutputs[0].tx = tx.hash;
+          tx.hash = tx.getHash();
 
+          try {
+              const txResponse = await axios.post(`${BLOCKCHAIN_SERVER}/transactions/`, tx);
+              console.log(`Transaction accepted. Waiting the miners!`);
+              console.log(txResponse.data.hash);
+          }
+          catch (err: any) {
+              console.error(err.response ? err.response.data : err.message);
+          }
+
+          return preMenu();
+      })
   })
-
 
   preMenu();
 }
@@ -175,12 +188,12 @@ function searchTx() {
 menu();
 
 
-
-
-
 /*
 Wallet {
   privateKey: '55b5b78037d12010e413ca8f15abc284ac0533c048a155448b120a796187b8b1',
   publicKey: '02a5c99a8dd12bb98a7f8a846e019b19203f3e24253330c9ed6f814082a39682dc'
 }
 */ 
+
+
+//03f92cdcc6a7c868d72f9be95cd13bed4d9b97b36b348cee8f44ad6e7ce3e92127

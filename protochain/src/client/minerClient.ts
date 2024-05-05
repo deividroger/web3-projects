@@ -7,6 +7,7 @@ import Block from "../lib/block";
 import Wallet from '../lib/wallet';
 import Transaction from '../lib/transaction';
 import TransactionType from '../lib/transactionType';
+import TransactionOutput from '../lib/transactionOutput';
 
 
 const BLOCKCHAIN_SERVER = process.env.BLOCKCHAIN_SERVER;
@@ -17,6 +18,25 @@ const minerWallet = new Wallet(process.env.MINER_WALLET);
 console.log("Logged as " + minerWallet.publicKey);
 
 let totalMined = 0;
+
+
+function getRewardTx(): Transaction {
+    const txo = new TransactionOutput({
+        toAddress: minerWallet.publicKey,
+        amount: 10
+    } as TransactionOutput);
+
+    const tx = new Transaction({
+        txOutputs: [txo],
+        type: TransactionType.FEE
+    } as Transaction);
+
+    tx.hash = tx.getHash();
+    tx.txOutputs[0].tx = tx.hash;
+
+    return tx;
+}
+
 
 async function mine() {
     console.log("Getting next block info...")
@@ -33,10 +53,8 @@ async function mine() {
 
     const newblock = Block.fromBlockInfo(blockInfo);
 
-    newblock.transactions.push(new Transaction({
-        to:minerWallet.publicKey,
-        type: TransactionType.FEE
-    } as Transaction));
+    newblock.transactions.push(getRewardTx());
+
     newblock.miner = minerWallet.publicKey;
     newblock.hash = newblock.getHash();
 
