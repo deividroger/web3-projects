@@ -115,11 +115,10 @@ export default class BlockChain {
 
     addBlock(block: Block): Validation {
 
-
         const nextBlock = this.getNextBlock();
-
+        
         if(!nextBlock){
-            new Validation(false, 'There is no next block info');
+          return  new Validation(false, 'There is no next block info');
         }
 
         const valid = block.isValid(nextBlock!.previousHash, nextBlock!.index -1, nextBlock!.difficulty);
@@ -168,9 +167,9 @@ export default class BlockChain {
     getNextBlock(): BlockInfo | null {
 
         if (!this.mempool || !this.mempool.length) {
+            
             return null;
         }
-
         const transactions = this.mempool.slice(0, BlockChain.TX_PER_BLOCK);
 
         const difficulty = this.getDifficulty();

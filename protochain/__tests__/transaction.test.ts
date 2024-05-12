@@ -22,6 +22,36 @@ describe('Transaction tests', () => {
 
     });
 
+    test('should NOT be valid (txto hash != tx hash)', () => {
+
+        const tx = new Transaction({
+            txInputs: [new TransactionInput()],
+            txOutputs: [new TransactionOutput()]
+        } as Transaction)
+
+        tx.txOutputs[0].tx = 'aleatory';
+
+        const valid = tx.isValid();
+        expect(valid.success).toBeFalsy();
+
+    });
+
+    test('should  NOT be valid (input < outputs)', () => {
+
+        const tx = new Transaction({
+            txInputs: [new TransactionInput({
+                amount:1
+            } as TransactionInput)],
+            txOutputs: [new TransactionOutput({
+                amount:2
+            } as TransactionOutput)]
+        } as Transaction)
+
+        const valid = tx.isValid();
+        expect(valid.success).toBeFalsy();
+
+    });
+
     test('should not be valid (invalid hash)', () => {
 
         const tx = new Transaction({
@@ -50,7 +80,6 @@ describe('Transaction tests', () => {
         const valid = tx.isValid();
 
         expect(valid.success).toBeTruthy();
-        
 
     });
 

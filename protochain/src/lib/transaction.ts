@@ -63,9 +63,9 @@ export default class Transaction {
                 return new Validation(false, `Invalid tx: input amounts must be equals or greater than outputs amounts.`);
         }
 
-        if(this.txOutputs.some(txo => txo.tx !== this.hash))
+        if(this.txOutputs.some(txo => txo.tx !== this.hash)){
             return new Validation(false, `Invalid TXO reference hash.`);
-
+        }
         //TODO: validar as taxas e recomensas quando tx.type === FEE
 
         return new Validation();

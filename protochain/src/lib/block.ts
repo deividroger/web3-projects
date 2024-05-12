@@ -106,9 +106,9 @@ export default class Block {
         if (this.nonce <1 || !this.miner) return new Validation(false, "No mined.");
 
         //if (this.hash !== this.getHash() ||  !this.hash.startsWith(prefix))
-        if (this.hash !== this.getHash())
+        if (this.hash !== this.getHash()) {
             return new Validation(false, "Invalid hash.");
-
+        }
         return new Validation();
     }
 

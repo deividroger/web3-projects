@@ -24,4 +24,35 @@ describe('TransactionOutput tests', () => {
         expect(valid.success).toBeTruthy();
     });
 
+    test('should NOT be valid (default)', () => {
+        const txtOutput = new TransactionOutput();
+
+        const valid = txtOutput.isValid();
+        expect(valid.success).toBeFalsy();
+    });
+
+    test('should NOT be valid', () => {
+
+        const txtOutput = new TransactionOutput({
+            amount: -10,
+            toAddress: alice.publicKey,
+            tx: "abc"
+        } as TransactionOutput);
+
+        const valid = txtOutput.isValid();
+        expect(valid.success).toBeFalsy();
+    });
+
+    test('should get Hash', () => {
+        const txtOutput = new TransactionOutput({
+            amount: 10,
+            toAddress: alice.publicKey,
+            tx: "abc"
+        } as TransactionOutput);
+
+        const hash = txtOutput.getHash();
+
+        expect(hash).toBeTruthy();
+    });
+
 })

@@ -4,6 +4,8 @@ import Block from '../src/lib/block';
 import Transaction from '../src/lib/transaction';
 import TransactionInput from '../src/lib/transactionInput';
 import Wallet from '../src/lib/wallet';
+import TransactionType from '../src/lib/transactionType';
+import TransactionOutput from '../src/lib/transactionOutput';
 
 jest.mock('../src/lib/block');
 jest.mock('../src/lib/transaction');
@@ -231,20 +233,36 @@ describe('Block tests', () => {
 
     });
 
+    test('Should not add block (invalid mempool) ', () => {
+
+        const blockchain = new BlockChain(alice.publicKey);
+
+        blockchain.mempool.push(new Transaction());
+        blockchain.mempool.push(new Transaction());
+
+
+        const tx = new Transaction({
+            txInputs: [new TransactionInput()],
+        } as Transaction)
+
+
+        const previousBlock = blockchain.getLastBlock();
+
+        const result = blockchain.addBlock(new Block({
+            index: 1,
+            previousHash: previousBlock.hash,
+            transactions: [tx]
+        } as Block));
+
+        expect(result.success).toBeFalsy();
+
+    });
+
     test('Should get block', () => {
 
         const blockchain = new BlockChain(alice.publicKey);
 
         const previousBlock = blockchain.getLastBlock();
-        
-
-        // blockchain.addBlock(new Block({
-        //     index: 1,
-        //     previousHash: previousBlock.hash,
-        //     transactions: [new Transaction({
-        //         txInputs: [new TransactionInput()],
-        //     } as Transaction)]
-        // } as Block));
 
         const block = blockchain.getBlock(previousBlock.getHash());
 
@@ -253,23 +271,30 @@ describe('Block tests', () => {
     });
 
 
-    test('Should NOT add block', () => {
+    test('Should NOT add block (invalid index)', () => {
 
         const blockchain = new BlockChain(alice.publicKey);
 
-        const tx = new Transaction({
-            txInputs: [new TransactionInput()]
-        } as Transaction);
-
+        blockchain.mempool.push(new Transaction());
+        
         const block = new Block({
             index: -1,
             previousHash: blockchain.blocks[0].hash,
-            transactions: [tx]
         } as Block)
         
-        blockchain.mempool.push(tx);
+        block.transactions.push(new Transaction({
+            type: TransactionType.FEE,
+            txOutputs: [new TransactionOutput({
+                toAddress: alice.publicKey,
+                amount: 1
+            } as TransactionOutput)]
+        } as Transaction));
 
+
+        block.hash = block.getHash();
+        
         const result = blockchain.addBlock(block);
+        
         expect(result.success).toEqual(false);
 
     });
@@ -286,8 +311,18 @@ describe('Block tests', () => {
     })
 
     test('Should NOT get nextBlockInfo', () => {
+        
         const blockchain = new BlockChain(alice.publicKey);
+        blockchain.mempool = [] as Transaction[];
+        
+       blockchain.addBlock(new Block({
+            index: 1,
+            previousHash: 'xpto',
+            transactions: [] as Transaction[]
+        } as Block));
+
         const info = blockchain.getNextBlock();
+        
         expect(info).toBeNull();
     })
 })
