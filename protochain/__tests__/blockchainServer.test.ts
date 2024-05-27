@@ -117,4 +117,12 @@ describe('BlockchainServer Tests', () => {
         expect(response.status).toEqual(201);
     });
 
+    test('GET /wallets/:wallet - Should get balance', async () => {
+        const response = await request(app)
+            .get('/wallets/abc');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.balance).toEqual(10);
+    })
+
 });

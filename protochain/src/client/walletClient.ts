@@ -93,7 +93,7 @@ function recoverWallet() {
 }
 
 
-function getBalance() {
+async function getBalance() {
   console.clear();
 
   if (!myWalletPub) {
@@ -101,6 +101,11 @@ function getBalance() {
     return preMenu();
   }
   //TODO: get balance via API
+
+  const {data} = await axios.get(`${BLOCKCHAIN_SERVER}/wallets/${myWalletPub}`);
+  console.log("Balance: " + data.balance);
+
+
 
   preMenu();
 }
@@ -138,25 +143,37 @@ function sendTx() {
               return preMenu();
           }
 
-          const tx = new Transaction();
-          tx.timestamp = Date.now();
-          tx.txOutputs = [new TransactionOutput({
-              toAddress: toWallet,
-              amount: amount
-          } as TransactionOutput)];
+          const txInputs = utxo.map(txo => TransactionInput.fromTxo(txo));
 
-          tx.type = TransactionType.REGULAR;
+          txInputs.forEach((txi, index,arr)=> arr[index].sign(myWalletPriv));
 
-          tx.txInputs = [new TransactionInput({
-              amount,
-              fromAddress: myWalletPub,
-              previousTx: utxo[0].tx
-          } as TransactionInput)];
+          const txOutputs = [] as TransactionOutput[];
 
-          tx.txInputs[0].sign(myWalletPriv);
-          tx.txOutputs[0].tx = tx.hash;
+          //transação de transferencia
+          txOutputs.push(new TransactionOutput({
+            toAddress: toWallet,
+             amount
+          } as TransactionOutput))
+
+
+          const remainingBalance = balance - amount - fee;
+
+          //transação de troco
+          txOutputs.push(new TransactionOutput({
+            toAddress: myWalletPub,
+            amount: remainingBalance
+          } as TransactionOutput))
+
+          const tx = new Transaction({
+            txInputs,
+            txOutputs
+          } as Transaction);
+          
           tx.hash = tx.getHash();
+          tx.txOutputs.forEach((txo,index,arr)=>arr[index].tx = tx.hash );
 
+          console.log(tx);
+          console.log("Remaining Balance: " + remainingBalance);
           try {
               const txResponse = await axios.post(`${BLOCKCHAIN_SERVER}/transactions/`, tx);
               console.log(`Transaction accepted. Waiting the miners!`);

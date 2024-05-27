@@ -1,8 +1,10 @@
-import Block from "./block";
-import Validation from "../validation";
-import BlockInfo from "../blockInfo";
-import Transaction from "./transaction";
-import TransactionSearch from "../transactionSearch";
+import Block from './block';
+import Validation from '../validation';
+import BlockInfo from '../blockInfo';
+import Transaction from './transaction';
+import TransactionSearch from '../transactionSearch';
+import TransactionInput from './transactionInput';
+import TransactionOutput from './transactionOutput';
 /**
  * Mock Blockchain class
  */
@@ -51,8 +53,8 @@ export default class BlockChain {
 
     addTransaction(transaction: Transaction): Validation {
 
-        const validation = transaction.isValid();
-        if (!transaction.isValid()) {
+        const validation = transaction.isValid(1,10);
+        if (!validation.success) {
             return validation
         }
 
@@ -100,25 +102,42 @@ export default class BlockChain {
     }
 
     getNextBlock(): BlockInfo {
-
-
-        const transactions = this.mempool.slice(0,2);
-
-        const difficulty = this.getDifficulty();
-        const previousHash = this.getLastBlock().hash;
-        const index = this.blocks.length;
-        const feePerTx = this.getFeePerTx();
-        const maxDifficulty = BlockChain.MAX_DIFFICULTY;
-
-        const blockInfo = {
-            index: index,
-            previousHash: previousHash,
-            difficulty: difficulty,
-            maxDifficulty: maxDifficulty,
-            feePerTx: feePerTx,
-            transactions: transactions,
+        return {
+            transactions: this.mempool.slice(0, 2),
+            difficulty: 2,
+            previousHash: this.getLastBlock().hash,
+            index: this.blocks.length,
+            feePerTx: this.getFeePerTx(),
+            maxDifficulty: 62,
         } as BlockInfo;
+    }
 
-        return blockInfo;
+    getTxInputs(wallet: string): (TransactionInput[] | undefined){ 
+    
+        return [new TransactionInput({
+                amount: 10,
+                fromAddress: wallet,
+                previousTx: 'abc',
+                signature: 'abc',
+
+        }as TransactionInput)];
+
+    }
+
+    getTxOutput(wallet:string): TransactionOutput[]   {
+        return [ new TransactionOutput({
+            amount: 10,
+            toAddress: wallet,
+            tx: 'abc'
+
+        } as TransactionOutput)];
+    }
+
+    getUtxo(wallet: string): TransactionOutput[] {
+        return this.getTxOutput(wallet);
+    }
+
+    getBalance(wallet: string) : number{
+        return 10;
     }
 }
