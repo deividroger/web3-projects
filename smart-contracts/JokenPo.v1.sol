@@ -16,6 +16,9 @@ contract JokenPo{
     address private player1;
     string public result;
 
+    address[] players;
+
+
  constructor() {
         owner = payable(msg.sender);
     }
@@ -32,6 +35,18 @@ function getBalance () public  view returns  (uint){
 
 }
 
+function exists(address winner) private  view  returns (bool) {
+    
+    for(uint i=0; i< players.length; i++){
+     if (players[i] == winner){
+        return  true;
+     }
+    }
+    return  false;
+
+
+}
+
 function finishGame(string memory newResult, address winner) private {
     
     address contractAddress = address(this);
@@ -43,6 +58,11 @@ function finishGame(string memory newResult, address winner) private {
     result = newResult;
     player1 = address(0);
     choice1 = Options.NONE;
+
+    if(!exists(winner)){
+        players.push(winner);
+    }
+    
 }
 
 
