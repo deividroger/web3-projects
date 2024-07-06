@@ -11,6 +11,12 @@ contract BookDatabase {
 
     uint32 private nextId = 0;
 
+    address private immutable owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
     function addBook(Book memory newBook) public {
         nextId++;
         books[nextId] = newBook;
@@ -31,10 +37,9 @@ contract BookDatabase {
         }
     }
 
-    function removeBook(uint32 id ) public {
-        delete  books[id];
+    function removeBook(uint32 id) public restricted {
+        delete books[id];
     }
-
 
     function compare(string memory str1, string memory str2)
         private
@@ -45,5 +50,10 @@ contract BookDatabase {
         bytes memory arrB = bytes(str2);
 
         return arrA.length == arrB.length && keccak256(arrA) == keccak256(arrB);
+    }
+
+    modifier restricted() {
+        require(owner == msg.sender, "You don't have permission");
+        _;
     }
 }
