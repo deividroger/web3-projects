@@ -46,7 +46,7 @@ contract BookDatabase {
         pure
         returns (bool)
     {
-        bytes memory arrA = bytes(str1);
+        bytes memory arrA = bytes(str1);    
         bytes memory arrB = bytes(str2);
 
         return arrA.length == arrB.length && keccak256(arrA) == keccak256(arrB);
