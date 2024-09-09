@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "test": "npx hardhat test",
+    "start": "npx hardhat node",
+    "compile": "npx hardhat compile",
+    "local-blockchain": "npx hardhat node",
+    "deploy:dev": "npx hardhat ignition deploy ignition/modules/Protocoin.ts --network local",
+    "deploy:prod": "npx hardhat ignition deploy ignition/modules/Protocoin.ts --network sepolia",
+    "verify:contract": "npx hardhat verify --network sepolia <contract_address_here>",
+    "console": "npx hardhat console"
+  },
+  "name": "protocoin-erc20",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "hardhat": "^2.22.10"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
