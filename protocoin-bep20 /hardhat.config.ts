@@ -16,6 +16,14 @@ const config: HardhatUserConfig = {
 
       }
     },
+    sepolia:{
+      url: process.env.INFURA_URL,
+      chainId: 11155111,
+      accounts: {
+        mnemonic: process.env.SECRET,
+
+      }
+    },
     bsctest:{
       url: process.env.BSC_URL,
       chainId:  97,
@@ -26,7 +34,7 @@ const config: HardhatUserConfig = {
     }
   },
   etherscan:{
-    apiKey: process.env.API_KEY
+    apiKey: process.env.API_KEY_BSC_SCAN
   }
 };
 

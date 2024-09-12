@@ -4,9 +4,10 @@
     "start": "npx hardhat node",
     "compile": "npx hardhat compile",
     "local-blockchain": "npx hardhat node",
-    "deploy:dev": "npx hardhat ignition deploy ignition/modules/Protocoin.ts --network local",
+    "verify:contract": "npx hardhat verify --network <networkName> <contract-address>",
     "deploy:bsc-test": "npx hardhat run scripts/deploy.ts --network bsctest",
-    "verify:contract": "npx hardhat verify --network bsctest <contract-address>",
+    "deploy:sepolia-test": "npx hardhat ignition deploy ignition/modules/Protocoin.ts --network sepolia",
+    "deploy:dev": "npx hardhat ignition deploy ignition/modules/Protocoin.ts --network local",
     "console": "npx hardhat console"
   },
   "name": "protocoin-bep20",
