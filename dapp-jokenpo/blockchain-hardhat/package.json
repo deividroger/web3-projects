@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "start": "npx hardhat node",
+    "test": "npx hardhat test",
+    "deploy:local": "npx hardhat run scripts/deploy.ts --network local",
+    "deploy:bsctest": "npx hardhat run scripts/deploy.ts --network bsctest"
+  },
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.16"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "D": "^1.0.0"
+  }
+}
